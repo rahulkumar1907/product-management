@@ -9,7 +9,7 @@ router.post('/login',userLogin)
 
 router.get('/user/:userId/profile', auth, getUser)
 
-// router.get('/user/:userId/profile',updateUser)
+router.put('/user/:userId/profile',auth, updateUser)
 
 
 module.exports = router;

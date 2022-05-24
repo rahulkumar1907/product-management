@@ -47,7 +47,7 @@ const userRegister = async (req, res) => {
 
         if (!isValid(fname)) return res.status(400).send({ status: false, Message: "Please provide your first name" })
         if (!fname.trim().match(/^[a-zA-Z ]{2,30}$/)) return res.status(400).send({ status: false, message: "Firstname should only contain alphabet" })
-        
+
         if (!isValid(lname)) return res.status(400).send({ status: false, Message: "Please provide your last name" })
         if (!lname.trim().match(/^[a-zA-Z ]{2,30}$/)) return res.status(400).send({ status: false, message: "lastname should only contain alphabet" })
 
@@ -60,7 +60,7 @@ const userRegister = async (req, res) => {
         if (!isValid(address)) return res.status(400).send({ status: false, Message: "Please provide your address" })
 
         let jsonAddress = JSON.parse(address);
-        
+
         if (jsonAddress) {
             if (jsonAddress.shipping) {
                 if (!isValid(jsonAddress.shipping.street)) return res.status(400).send({ status: false, Message: "Please provide your street name in shipping address" })
@@ -127,60 +127,62 @@ const userRegister = async (req, res) => {
 //to login user
 const userLogin = async (req, res) => {
     let data = req.body
-    const {email,password}  = data
+    const { email, password } = data
 
-     if(!isValid(email)) return res.status(400).send({status:false, message:'please enter your email address'})
-    
+    if (!isValid(email)) return res.status(400).send({ status: false, message: 'please enter your email address' })
+
     if (!email.trim().match(/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/)) return res.status(400).send({ status: false, message: "Please enter valid email" })
 
-    if(!isValid(password)) return res.status(400).send({status:false, message:'please enter your password'})
+    if (!isValid(password)) return res.status(400).send({ status: false, message: 'please enter your password' })
 
-    const isEmailExists = await userModel.findOne({email:email})
-    if(!isEmailExists) return res.status(400).send({status:false, message:'Email is wrong'})
+    const isEmailExists = await userModel.findOne({ email: email })
+    if (!isEmailExists) return res.status(400).send({ status: false, message: 'Email is wrong' })
 
     if (!isValidPassword(password)) return res.status(400).send({ status: false, message: "Please provide a vaild password ,Password should be of 8 - 15 characters" })
 
     const isPasswordMatch = await bcrypt.compare(password, isEmailExists.password)
 
-    if(!isPasswordMatch) return res.status(400).send({status:false, message:'password is wrong'})
-    
+    if (!isPasswordMatch) return res.status(400).send({ status: false, message: 'password is wrong' })
+
 
     const token = jwt.sign({
-        userId : isEmailExists._id.toString(),
+        userId: isEmailExists._id.toString(),
         expiresIn: '24h'
 
-      }, 'shoppingCart');
+    }, 'shoppingCart');
 
-      let result = {
-        userId : isEmailExists._id.toString(),
+    let result = {
+        userId: isEmailExists._id.toString(),
         token: token
-      }
+    }
 
-    res.status(200).send({status:false, message:"Login Successful", data: result});
-    
+    res.status(200).send({ status: false, message: "Login Successful", data: result });
+
 }
 
 //to get user information
 const getUser = async (req, res) => {
-    try{
+    try {
         userId = req.params.userId
 
-        if(!isValidOjectId(userId)) return res.status(400).send({ status: false, message: " Invalid userId"})
+        if (!isValidOjectId(userId)) return res.status(400).send({ status: false, message: " Invalid userId" })
 
-        let data = await userModel.findById({_id: userId})
-        if (!data){return res.status(404).send({status: false , message :"User profile not found"})}
+        let data = await userModel.findById({ _id: userId })
+        if (!data) { return res.status(404).send({ status: false, message: "User profile not found" }) }
 
-        return res.status(200).send({status:true ,message:"User profile details",data:data})
+        return res.status(200).send({ status: true, message: "User profile details", data: data })
 
     }
-    catch(error){return res.status(500).send({status:false,message:error.message})}
-    }
+    catch (error) { return res.status(500).send({ status: false, message: error.message }) }
+}
 
 //to update user information
 const updateUser = async (req, res) => {
-
+    
 }
 
-module.exports = { userRegister, userLogin, getUser}
+
+
+module.exports = { userRegister, userLogin, getUser, updateUser }
 
 // module.exports = { userRegister, userLogin, getUser, updateUser }
