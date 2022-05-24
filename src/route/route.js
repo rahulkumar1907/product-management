@@ -7,7 +7,7 @@ router.post('/register',userRegister)
 
 router.post('/login',userLogin)
 
-router.get('/user/:userId/profile',getUser)
+router.get('/user/:userId/profile', auth, getUser)
 
 // router.get('/user/:userId/profile',updateUser)
 

@@ -1,6 +1,7 @@
 const userModel = require('../model/userModel')
 const bcrypt = require("bcrypt")
 const uploadFile = require('./awsController')
+const mongoose = require('mongoose')
 const jwt = require('jsonwebtoken')
 let saltRounds = 10
 
@@ -164,9 +165,7 @@ const getUser = async (req, res) => {
     try{
         userId = req.params.userId
 
-        if (!userId){return res.status(400).send({status:false , message:"userId required"})}
-
-        if(userId !== req.userId){return res.status(400).send({status:false,mesaage:"Invalid user"})}
+        if(!isValidOjectId(userId)) return res.status(400).send({ status: false, message: " Invalid userId"})
 
         let data = await userModel.findById({_id: userId})
         if (!data){return res.status(404).send({status: false , message :"User profile not found"})}
