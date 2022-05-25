@@ -25,7 +25,7 @@ const uploadFile = async function (file, name) {
             if (err) {
                 return reject({ "error": err })
             }
-
+            
             return resolve(data.Location) 
         })
     })
