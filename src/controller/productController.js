@@ -49,10 +49,7 @@ const createProduct = async (req, res) => {
 
         if (currencyId != 'INR') return res.status(400).send({ status: false, Message: "currency should be INR" })
 
-        if (!isValid(currencyFormat)) {
-            res.status(400).send({ status: false, Message: "Please provide currency Format" })
-
-        }
+        if (!isValid(currencyFormat)) return res.status(400).send({ status: false, Message: "Please provide currency Format" })
         if (currencyFormat != "₹") return res.status(400).send({ status: false, Message: "currency format should be ₹ " })
 
         if (availableSizes) {
