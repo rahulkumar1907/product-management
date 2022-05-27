@@ -216,53 +216,51 @@ const updateUser = async (req, res) => {
             if (!Object.keys(data).length) return res.status(400).send({ status: false, message: "It seems like Nothing to update" })
         }
 
-        // if (data?.fname === '') {
-        //     return res.status(400).send({ status: false, Message: "please enter your name" })
-        // }
-
-        if (data?.fname) {
-
+        // Check fname is empty or not
+        if (data.fname || data.fname === '') {
             if (!isValid(data.fname)) return res.status(400).send({ status: false, Message: "Please provide your first name" })
-            if (!data?.fname?.trim().match(/^[a-zA-Z ]{2,30}$/)) return res.status(400).send({ status: false, message: "Firstname should only contain alphabet" })
+            if (!data.fname.trim().match(/^[a-zA-Z ]{2,30}$/)) return res.status(400).send({ status: false, message: "Firstname should only contain alphabet" })
 
         }
 
         //check if lname is present or Not
-        if (data?.lname) {
+        if (data.lname || data.lname === '') {
             if (!isValid(data.lname)) return res.status(400).send({ status: false, Message: "Please provide your last name" })
             if (!data.lname.trim().match(/^[a-zA-Z ]{2,30}$/)) return res.status(400).send({ status: false, message: "lastname should only contain alphabet" })
         }
 
         //check if email is present or not
-        if (data?.email) {
-            if (!isValid(data?.email)) return res.status(400).send({ status: false, Message: "Please provide your email address" })
+        if (data.email || data.email === '') {
+            if (!isValid(data.email)) return res.status(400).send({ status: false, Message: "Please provide your email address" })
             if (!data.email.trim().match(/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/)) return res.status(400).send({ status: false, message: "Please enter valid email" })
 
+            //Check email in DB
             let checkEmail = await userModel.findOne({ email: data.email })
             if (checkEmail) return res.status(400).send({ status: false, message: "Email already exists" })
         }
 
-        if (data?.phone) {
-            if (!isValid(data?.phone)) return res.status(400).send({ status: false, Message: "Please provide your valid phone number" })
+        if (data.phone || data.phone === '') {
+            if (!isValid(data.phone)) return res.status(400).send({ status: false, Message: "Please provide your valid phone number" })
             if (!data.phone.trim().match(/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/)) return res.status(400).send({ status: false, message: "Please enter valid phone" })
 
+            //Check phone in DB
             const isRegisterPhone = await userModel.findOne({ phone: data.phone })
             if (isRegisterPhone) return res.status(400).send({ status: false, message: "phone number is already registered" })
-
         }
+
         if (isValidFiles(files)) {
             if (files.length === 0) return res.status(400).send({ status: false, Message: "Please upload profileImage" })
             const profilePicture = await uploadFile(files[0])
             data.profileImage = profilePicture
         }
 
-        if (data?.password) {
+        if (data.password || data.password === '') {
             if (!isValid(data.password)) return res.status(400).send({ status: false, Message: "Please provide your password" })
             let hash = await bcrypt.hash(data.password, saltRounds)
             data.password = hash
         }
 
-        if (data?.address) {
+        if (data?.address || data?.address === '') {
             if (!isValid(data.address)) return res.status(400).send({ status: false, Message: "Please provide your address" })
             data.address = JSON.parse(data.address)
             if (typeof data.address != 'object') return res.status(400).send({ status: false, message: "Address must be in object" });
