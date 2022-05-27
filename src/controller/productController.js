@@ -2,8 +2,6 @@ const productModel = require('../model/productModel');
 const uploadFile = require('./awsController');
 const mongoose = require('mongoose')
 
-const bcrypt = require('bcrypt');
-
 /**********************Global validation*****************************/
 //to check validation 
 const isValid = (value) => {
@@ -161,7 +159,9 @@ const updateProduct = async (req, res) => {
         }
 
         if (data?.price) {
-            if (!isValid(data?.price)) return res.status(400).send({ status: false, Message: "Please provide price" })
+            if (!isValid(data.price)) return res.status(400).send({ status: false, Message: "Please provide price" })
+            if (!data.price.match(/^\d*\.?\d*$/)) return res.status(400).send({ status: false, message: "Price must be an integer" })
+
         }
         //check if currencyId is present or not
         if (data?.currencyId === '') {
@@ -174,7 +174,7 @@ const updateProduct = async (req, res) => {
             if (data.currencyId != 'INR') return res.status(400).send({ status: false, Message: "currency should be INR" })
 
         }
-        console.log(typeof files);
+        // console.log(typeof files);
 
         //check if productImage is present or not
         if (files) {
@@ -231,14 +231,16 @@ const updateProduct = async (req, res) => {
 
         if (data?.installments) {
             if (!isValid(data.installments)) return res.status(400).send({ status: false, Message: "Please provide installments" })
+            if (!data.installments.match(/^\d*\.?\d*$/)) return res.status(400).send({ status: false, message: "Installment must be an integer" })
+
         }
         
 
         const updateData = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, {
             title: data.title, description: data.description, price: data.price, currencyId: data.currencyId, currencyFormat: data.currencyFormat, productImage: data.productImage,
-            style: data.style, availableSizes: availableSize, installments: data.installmentseUpdate, deletedAt: Date.now()
+            style: data.style, availableSizes: availableSize, installments: data.installmentseUpdate, updatedAt: Date.now()
         }, { new: true })
-        console.log(updateData)
+        // console.log(updateData)
         return res.status(200).send({ status: true, message: "product updated successfully", data: updateData })
 
 
@@ -260,7 +262,7 @@ const deleteProduct = async (req, res) => {
         const products = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, { isDeleted: true, deletedAt: Date.now() }, { new: true });
         if (!products) return res.status(404).send({ status: false, message: "products not found" });
 
-        return res.status(200).send({ status: true, data: products });
+        return res.status(200).send({ status: true, message: "Product has been deleted successfully",data: products });
     }
     catch (error) { res.status(500).send({ status: false, message: error.message, }) }
 }
