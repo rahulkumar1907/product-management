@@ -30,11 +30,11 @@ router.delete('/products/:productId', deleteProduct);
 
 router.post('/users/:userId/cart', createCart);
 
-router.put('/users/:userId/cart', createCart);
+router.put('/users/:userId/cart', updateCart);
 
-router.get('/users/:userId/cart', createCart);
+router.get('/users/:userId/cart', getCart);
 
-router.delete('/users/:userId/cart', createCart);
+router.delete('/users/:userId/cart', deleteCart);
 
 
 

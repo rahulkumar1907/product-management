@@ -7,7 +7,6 @@ const auth = function (req, res, next) {
         if(typeof token === "undefined"){
             return res.status(200).send({status: false, message:"Please Enter token"})
         }
-
         const bearer = token.split(" ");
         const bearerToken = bearer[1]
     
