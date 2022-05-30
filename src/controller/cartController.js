@@ -31,7 +31,7 @@ const createCart = async (req, res) => {
       return res.status(400).send({ status: false, message: " Invalid userId" })
 
     //  authorized user or not
-    // if (userId !== req.userId) return res.status(400).send({ status: false, message: "Unauthorized access" })
+    if (userId !== req.userId) return res.status(400).send({ status: false, message: "Unauthorized access" })
 
     // valid request body
     if (!Object.keys(data).length)
@@ -110,19 +110,13 @@ const createCart = async (req, res) => {
           { new: true }
         )
 
-        if (!updateCart)
-          return res
-            .status(200)
-            .send({
-              status: true,
-              msg: "U are not authorised to update another cart",
-            })
+       
 
         return res
           .status(200)
           .send({
             status: true,
-            msg: "sucesfully add product quentity",
+            msg: "sucesfully add product quantity",
             data: updateCart,
           })
       }
@@ -146,55 +140,6 @@ const createCart = async (req, res) => {
         data: updateCart,
       })
 
-    // for updating product price when cart exist
-    //   for (i = 0; i < checkProduct.length; i++) {
-    //     var price = checkProduct[i].price
-    //   }
-
-    //   // pushing items into items key
-    //   let itemArray = checkExistingCart.items
-    //   // console.log(itemArray)
-    //   for (let i = 0; i < itemArray.length; i++) {
-    //     if (itemArray[i].productId === item[0].productId) {
-    //       let addQuantity = itemArray[0].quantity + item[0].quantity
-
-    //       let changes = {
-    //         productId: itemArray[0].productId,
-    //         quantity: addQuantity,
-    //       }
-    //       let newItem = itemArray.map((x) => {
-    //         return (x.quantity = changes)
-    //       })
-    //       console.log(newItem)
-
-    //       let cartUpdate = await cartModel.findOneAndUpdate(
-    //         { userId: userId },
-
-    //         {
-    //           items: newItem,
-    //           totalPrice: checkExistingCart.totalPrice + price,
-    //         },
-
-    //         { new: true }
-    //       )
-    //       return res.status(200).send({ status: true, data: cartUpdate })
-    //     }
-    //   }
-
-    //   for (let i = 0; i < itemArray.length; i++) {
-    //     let itemPush = itemArray.concat(item)
-    //     //  updating the according to require using mental code logic to update totalPrice ,push item and to length of total items
-    //     let cartUpdate = await cartModel.findOneAndUpdate(
-    //       { userId: userId },
-    //       {
-    //         items: itemPush,
-    //         totalPrice: checkExistingCart.totalPrice + price,
-    //         totalItems: itemPush.length,
-    //       },
-    //       { new: true }
-    //     )
-    //     return res.status(200).send({ status: true, data: cartUpdate })
-    //   }
   } catch (error) {
     res.status(500).send({ status: false, message: error.message })
   }
@@ -213,7 +158,7 @@ const updateCart = async (req, res) => {
       return res.status(400).send({ status: false, message: "invalid User Id" })
 
     //Authorization of user
-    // if(req.userId !== userId) return res.status(403).send({status:false,message:"You are not authorized to update your cart"})
+    if(req.userId !== userId) return res.status(403).send({status:false,message:"You are not authorized to update your cart"})
 
     // if empty body
     if (!Object.keys(data).length) {
@@ -349,7 +294,7 @@ const getCart = async (req, res) => {
         .status(400)
         .send({ status: false, message: "Please provide a valid userId" })
 
-    //Authorization Field
+    // Authorization Field
     if (req.userId !== jwtUserId)
       return res
         .status(400)
@@ -412,7 +357,8 @@ const deleteCart = async (req, res) => {
 
     const deletedCart = await cartModel.findOneAndUpdate(
       { userId: userId },
-      { item: [], totalItems: 0, totalPrice: 0 }
+      { items: [], totalItems: 0, totalPrice: 0 },
+      {new:true}
     )
     res.status(200).send({
       status: true,

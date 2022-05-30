@@ -28,13 +28,13 @@ router.delete('/products/:productId', deleteProduct);
 
 /************************For carts******************************************************/
 
-router.post('/users/:userId/cart', createCart);
+router.post('/users/:userId/cart',auth, createCart);
 
-router.put('/users/:userId/cart', updateCart);
+router.put('/users/:userId/cart',auth, updateCart);
 
-router.get('/users/:userId/cart', getCart);
+router.get('/users/:userId/cart',auth, getCart);
 
-router.delete('/users/:userId/cart', deleteCart);
+router.delete('/users/:userId/cart',auth, deleteCart);
 
 
 
