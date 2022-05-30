@@ -1,7 +1,7 @@
 const productModel = require("../model/productModel")
 const uploadFile = require("./awsController")
 const mongoose = require("mongoose")
-const {isValid,isValidOjectId,isValidFiles} = require("../validation/validate")
+const {isValid,isValidObjectId,isValidFiles} = require("../validation/validate")
 
 
 
@@ -257,7 +257,7 @@ const getProductById = async (req, res) => {
   try {
     let productId = req.params.productId
 
-    if (!isValidOjectId(productId))
+    if (!isValidObjectId(productId))
       return res
         .status(400)
         .send({ status: false, message: " Invalid productId" })
@@ -285,7 +285,7 @@ const updateProduct = async (req, res) => {
 
     let files = req.files
 
-    if (!isValidOjectId(productId))
+    if (!isValidObjectId(productId))
       return res
         .status(400)
         .send({ status: false, message: " Invalid productId" })
@@ -463,7 +463,7 @@ const deleteProduct = async (req, res) => {
     const productId = req.params.productId
 
     //id format validation
-    if (!isValidOjectId(productId))
+    if (!isValidObjectId(productId))
       return res
         .status(400)
         .send({ status: false, message: " Invalid productId" })

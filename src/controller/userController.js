@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt")
 const uploadFile = require("./awsController")
 const mongoose = require("mongoose")
 const jwt = require("jsonwebtoken")
-const {isValid,isValidOjectId,isValidRequestBody,isValidPassword,isValidFiles} = require("../validation/validate")
+const {isValid,isValidObjectId,isValidRequestBody,isValidPassword,isValidFiles} = require("../validation/validate")
 let saltRounds = 10
 
 /*************Create User (1st Api)*******************************/
@@ -273,7 +273,7 @@ const getUser = async (req, res) => {
   try {
     userId = req.params.userId
 
-    if (!isValidOjectId(userId))
+    if (!isValidObjectId(userId))
       return res.status(400).send({ status: false, message: " Invalid userId" })
 
     if (req.userId !== userId)
@@ -306,7 +306,7 @@ const updateUser = async (req, res) => {
     console.log(data)
     let files = req.files
 
-    if (!isValidOjectId(userId))
+    if (!isValidObjectId(userId))
       return res.status(400).send({ status: false, message: " Invalid userId" })
 
     if (userId !== req.userId)

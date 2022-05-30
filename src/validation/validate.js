@@ -1,3 +1,4 @@
+const mongoose = require("mongoose")
 //to check validation
 const isValid = (value) => {
   if (typeof value === "undefined" ||  value === null) return false
@@ -18,8 +19,8 @@ const isValidFiles = (files) => {
 }
 
 //to check validation of objectId
-const isValidOjectId = (objectId) => {
+const isValidObjectId = (objectId) => {
   return mongoose.isValidObjectId(objectId)
 }
 
-modules.exports = {isValid,isValidOjectId,isValidRequestBody,isValidPassword,isValidFiles}
+module.exports = {isValid,isValidObjectId,isValidRequestBody,isValidPassword,isValidFiles}
