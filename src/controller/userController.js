@@ -323,7 +323,7 @@ const updateUser = async (req, res) => {
           .send({ status: false, message: "It seems like Nothing to update" })
     }
   
-    if(!files.length) return res.status(400).send({status: false, message: "Please provide profileImage"})
+    //if(!files.length) return res.status(400).send({status: false, message: "Please provide profileImage"})
 
 
     // Check fname is empty or not
@@ -414,7 +414,12 @@ const updateUser = async (req, res) => {
         return res
           .status(400)
           .send({ status: false, Message: "Please provide your address" })
+        
+      //parse the address to the JSON    
       data.address = JSON.parse(data.address)
+
+
+
       if (typeof data.address != "object")
         return res
           .status(400)
@@ -434,14 +439,16 @@ const updateUser = async (req, res) => {
               status: false,
               Message: "Please provide your city name in shipping address",
             })
+            
         }
+        
         if (data?.address?.shipping?.pincode) {
           if (!isValid(data.address.shipping.pincode))
             return res.status(400).send({
               status: false,
               Message: "Please provide your pin code in shipping address",
             })
-          if (!/^\d{6}$/.test(data.address.billing.pincode))
+          if (!/^\d{6}$/.test(data.address.shipping.pincode))
             return res.status(400).send({
               status: false,
               message: "PinCode should in six digit Number",

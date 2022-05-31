@@ -198,6 +198,7 @@ const updateCart = async (req, res) => {
         { $inc: { "items.$.quantity": -1, totalPrice: -productPrice } },
         { new: true }
       )
+      
       //to check if product quantity is 0 or note
       let qty = updateCart.items.filter((item) => item.productId.toString() === productId)[0].quantity
 
