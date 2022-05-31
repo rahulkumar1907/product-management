@@ -7,8 +7,9 @@ const isValid = (value) => {
 }
 
 const isValidRequestBody = (requestBody) => {
-  return Object.keys(requestBody).length > 0
+  return Object.keys(requestBody).length 
 }
+
 
 const isValidPassword = (password) => {
   if (password.length > 7 && password.length < 16) return true

@@ -14,7 +14,7 @@ const userRegister = async (req, res) => {
     if (!isValidRequestBody(data))
       return res.status(400).send({
         status: false,
-        message: "Invalid request. please provide details.",
+        message: "Request body can't be empty",
       })
 
     const { fname, lname, email, phone, password, address } = data
@@ -68,7 +68,6 @@ const userRegister = async (req, res) => {
         .send({ status: false, Message: " Address must be provide" })
 
     let jsonAddress = JSON.parse(address)
-    console.log(typeof jsonAddress)
     if (typeof jsonAddress != "object")
       return res
         .status(400)
@@ -209,6 +208,10 @@ const userLogin = async (req, res) => {
     let data = req.body
     const { email, password } = data
 
+    if(!isValidRequestBody(data)) return res
+    .status(400)
+    .send({ status: false, message: "please enter your email and password both" })
+
     if (!isValid(email))
       return res
         .status(400)
@@ -226,7 +229,7 @@ const userLogin = async (req, res) => {
 
     const isEmailExists = await userModel.findOne({ email: email })
     if (!isEmailExists)
-      return res.status(400).send({ status: false, message: "Email is wrong" })
+      return res.status(401).send({ status: false, message: "Email is Incorrect" })
 
     if (!isValidPassword(password))
       return res.status(400).send({
@@ -242,8 +245,8 @@ const userLogin = async (req, res) => {
 
     if (!isPasswordMatch)
       return res
-        .status(400)
-        .send({ status: false, message: "password is wrong" })
+        .status(401)
+        .send({ status: false, message: "Password is Incorrect" })
 
     const token = jwt.sign(
       {
@@ -303,7 +306,6 @@ const updateUser = async (req, res) => {
   try {
     let userId = req.params.userId
     let data = req.body
-    console.log(data)
     let files = req.files
 
     if (!isValidObjectId(userId))
@@ -311,7 +313,7 @@ const updateUser = async (req, res) => {
 
     if (userId !== req.userId)
       return res
-        .status(400)
+        .status(403)
         .send({ status: false, message: "Unauthorized access" })
 
     if (!(files && !Object.keys(data).length)) {
@@ -320,6 +322,9 @@ const updateUser = async (req, res) => {
           .status(400)
           .send({ status: false, message: "It seems like Nothing to update" })
     }
+  
+    if(!files.length) return res.status(400).send({status: false, message: "Please provide profileImage"})
+
 
     // Check fname is empty or not
     if (data.fname || data.fname === "") {
@@ -436,7 +441,7 @@ const updateUser = async (req, res) => {
               status: false,
               Message: "Please provide your pin code in shipping address",
             })
-          if (!/^\d{6}$/.test(jsonAddress.billing.pincode))
+          if (!/^\d{6}$/.test(data.address.billing.pincode))
             return res.status(400).send({
               status: false,
               message: "PinCode should in six digit Number",
@@ -465,7 +470,7 @@ const updateUser = async (req, res) => {
               status: false,
               Message: "Please provide your pin code in billing address",
             })
-          if (!/^\d{6}$/.test(jsonAddress.billing.pincode))
+          if (!/^\d{6}$/.test(data.address.billing.pincode))
             return res.status(400).send({
               status: false,
               message: "PinCode should in six digit Number",

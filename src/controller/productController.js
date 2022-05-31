@@ -1,9 +1,7 @@
 const productModel = require("../model/productModel")
 const uploadFile = require("./awsController")
 const mongoose = require("mongoose")
-const {isValid,isValidObjectId,isValidFiles} = require("../validation/validate")
-
-
+const { isValid, isValidObjectId, isValidFiles } = require("../validation/validate")
 
 /***************************Global validation End**************************/
 
@@ -18,27 +16,12 @@ const createProduct = async (req, res) => {
         message: "please provide product details to create.",
       })
 
-    const {
-      title,
-      description,
-      price,
-      currencyId,
-      currencyFormat,
-      isFreeShipping,
-      style,
-      availableSizes,
-    } = data
+    const { title, description, price, currencyId, currencyFormat, isFreeShipping, style, availableSizes } = data
     const files = req.files
 
-    if (!isValidFiles(files))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please provide product's image" })
+    if (!isValidFiles(files)) return res.status(400).send({ status: false, message: "Please provide product's image" })
 
-    if (!isValid(title))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please provide product's title" })
+    if (!isValid(title)) return res.status(400).send({ status: false, message: "Please provide product's title" })
 
     if (!isValid(description))
       return res.status(400).send({
@@ -46,52 +29,35 @@ const createProduct = async (req, res) => {
         message: "Please provide product's description",
       })
 
-    if (!isValid(price))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please provide product's price" })
-    if (!price.match(/^\d*\.?\d*$/))
-      return res
-        .status(400)
-        .send({ status: false, message: "Price must be an integer" })
+    if (!isValid(price)) return res.status(400).send({ status: false, message: "Please provide product's price" })
+    if (!price.match(/^\d*\.?\d*$/)) return res.status(400).send({ status: false, message: "Price must be an integer" })
 
-    if (!isValid(currencyId))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please provide currencyId" })
-
-    if (currencyId != "INR")
-      return res
-        .status(400)
-        .send({ status: false, message: "currency should be INR" })
+    if (!isValid(currencyId)) return res.status(400).send({ status: false, message: "Please provide currencyId" })
+    if (!currencyId.match(/^(INR|inr|Inr)$/))
+      return res.status(400).send({ status: false, message: "currencyId must be INR" })
 
     if (!isValid(currencyFormat))
-      return res
-        .status(400)
-        .send({ status: false, message: "Please provide currency Format" })
-    if (currencyFormat != "₹")
-      return res
-        .status(400)
-        .send({ status: false, message: "currency format should be ₹ " })
+      return res.status(400).send({ status: false, message: "Please provide currency Format" })
+    if (currencyFormat != "₹") return res.status(400).send({ status: false, message: "currency format should be ₹ " })
+
+    if (isFreeShipping == "") return res.status(400).send({ status: false, message: "Freeshipping can't be empty" })
+    if (!isFreeShipping.match(/^(true|false|TRUE|FALSE)$/))
+      return res.status(400).send({ status: false, message: "Freeshipping must be in Boolean (True or false)" })
 
     if (!availableSizes)
       return res.status(400).send({
         status: false,
-        message: "Atleast one product size should be give",
+        message: "Please provide atleast one available size",
       })
 
     if (availableSizes) {
       var availableSize = availableSizes.toUpperCase().split(",") // Creating an array
       if (availableSize.length === 0) {
-        return res
-          .status(400)
-          .send({ status: false, message: "please provide the product sizes" })
+        return res.status(400).send({ status: false, message: "please provide the product sizes" })
       }
 
       for (let i = 0; i < availableSize.length; i++) {
-        if (
-          !["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSize[i])
-        ) {
+        if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSize[i])) {
           return res.status(400).send({
             status: false,
             message: `Sizes should be ${[
@@ -110,18 +76,13 @@ const createProduct = async (req, res) => {
 
     if (data.installments) {
       if (!data.installments.match(/^\d*\.?\d*$/))
-        return res
-          .status(400)
-          .send({ status: false, message: "Installment must be an integer" })
+        return res.status(400).send({ status: false, message: "Installment must be an integer and cant be empty" })
     }
 
     /************************Duplicacy validation****************************************/
 
     const isTitleExist = await productModel.findOne({ title: title })
-    if (isTitleExist)
-      return res
-        .status(400)
-        .send({ status: false, message: "title is already registered" })
+    if (isTitleExist) return res.status(400).send({ status: false, message: "title is already registered" })
 
     /********************************Validation ends**********************************/
 
@@ -155,17 +116,10 @@ const createProduct = async (req, res) => {
 const getProduct = async (req, res) => {
   try {
     let data = req.query
-    if (
-      !data.name &&
-      !data.size &&
-      !data.priceGreaterThan &&
-      !data.priceLessThan &&
-      !Object.keys(data).length
-    ) {
+    if (!data.name && !data.size && !data.priceGreaterThan && !data.priceLessThan && !Object.keys(data).length) {
       return res.status(400).send({
         status: false,
-        message:
-          "Please provide atleast one search parameter from name,size,priceGreaterThan,priceLessThan",
+        message: "Please provide atleast one search parameter from name, size, priceGreaterThan, priceLessThan",
       })
     }
 
@@ -175,7 +129,7 @@ const getProduct = async (req, res) => {
       if (!isValid(data.name))
         return res.status(400).send({
           status: false,
-          message: "Enter a valid value for product name ",
+          message: "Enter a value for product name ",
         })
 
       //using $regex to match the names of products & "i" for case insensitive.
@@ -184,34 +138,52 @@ const getProduct = async (req, res) => {
       filter.title["$options"] = "i"
     }
 
+    
     if (data.size || data.size === "") {
       if (!isValid(data.size))
         return res.status(400).send({
           status: false,
-          message: "Enter a valid value for product size ",
+          message: "Enter a value for product size ",
         })
+
+        
+    if (data.size) {
+      var size = data.size.toUpperCase().split(",") // Creating an array
+      if (size.length === 0) {
+        return res.status(400).send({ status: false, message: "please provide the product sizes" })
+      }
+
+      let enumSize = ["S", "XS", "M", "X", "L", "XXL", "XL"]
+      for (let i = 0; i < size.length; i++) {
+        if (!enumSize.includes(size[i])) {
+          return res.status(400).send({
+            status: false,
+            message: `Sizes should be ${enumSize} value (with multiple value please give saperated by comma)`,
+          })
+        }
+      }
+    }
       filter.availableSizes = {}
       filter.availableSizes["$in"] = data.size.toUpperCase().split(",")
+
     }
+    console.log(filter)
 
     if (data.priceGreaterThan === "" || data.priceLessThan === "")
-      return res
-        .status(400)
-        .send({ status: false, message: "Price cant be empty" })
+      return res.status(400).send({ status: false, message: "Price cant be empty" })
 
     if (data.priceGreaterThan || data.priceLessThan) {
       if (data.priceGreaterThan) {
         if (!isValid(data.priceGreaterThan))
           return res.status(400).send({
             status: false,
-            message: "Enter a valid value for product price ",
+            message: "Enter a valid product price ",
           })
         let numGte = Number(data.priceGreaterThan)
         if (!/^\d*\.?\d*$/.test(numGte))
           return res.status(400).send({
             status: false,
-            message:
-              "Enter a valid value and must be number for price greater than ",
+            message: "Enter a valid value and must be number for price greater than ",
           })
       }
 
@@ -220,8 +192,7 @@ const getProduct = async (req, res) => {
         if (!/^\d*\.?\d*$/.test(numLte))
           return res.status(400).send({
             status: false,
-            message:
-              "Enter a valid value and must be number  for price less than ",
+            message: "Enter a valid value and must be number  for price less than ",
           })
       }
 
@@ -238,16 +209,11 @@ const getProduct = async (req, res) => {
     const getProduct = await productModel.find(filter).sort({ title: 1 })
 
     if (!getProduct.length) {
-      return res
-        .status(404)
-        .send({ status: false, message: "Product not found" })
+      return res.status(404).send({ status: false, message: "Product not found" })
     }
 
-    return res
-      .status(200)
-      .send({ status: true, message: "Product details", data: getProduct })
+    return res.status(200).send({ status: true, message: "Product details", data: getProduct })
   } catch (error) {
-    //console.log(error)
     res.status(500).send({ status: false, message: error.message })
   }
 }
@@ -257,21 +223,14 @@ const getProductById = async (req, res) => {
   try {
     let productId = req.params.productId
 
-    if (!isValidObjectId(productId))
-      return res
-        .status(400)
-        .send({ status: false, message: " Invalid productId" })
+    if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: " Invalid productId" })
 
     let data = await productModel.findOne({ _id: productId, isDeleted: false })
     if (!data) {
-      return res
-        .status(404)
-        .send({ status: false, message: "Product not found" })
+      return res.status(404).send({ status: false, message: "Product not found" })
     }
 
-    return res
-      .status(200)
-      .send({ status: true, message: "Product details", data: data })
+    return res.status(200).send({ status: true, message: "Product details", data: data })
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message })
   }
@@ -285,77 +244,48 @@ const updateProduct = async (req, res) => {
 
     let files = req.files
 
-    if (!isValidObjectId(productId))
-      return res
-        .status(400)
-        .send({ status: false, message: " Invalid productId" })
+    if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: " Invalid productId" })
 
     //Check product in DB
     let checkedProductId = await productModel.findOne({ _id: productId })
-    if (!checkedProductId)
-      return res
-        .status(404)
-        .send({ status: false, message: "Product not Exist" })
+    if (!checkedProductId) return res.status(404).send({ status: false, message: "Product not Exist" })
 
     if (!(files && !Object.keys(data).length)) {
       if (!Object.keys(data).length)
-        return res
-          .status(400)
-          .send({ status: false, message: "It seems like Nothing to update" })
+        return res.status(400).send({ status: false, message: "It seems like Nothing to update" })
     }
 
     //check if title is present or Not
     if (data.title || data.title === "") {
-      if (!isValid(data.title))
-        return res
-          .status(400)
-          .send({ status: false, message: "Please provide title" })
+      if (!isValid(data.title)) return res.status(400).send({ status: false, message: "Please provide title" })
     }
 
     // check title in DB
     const isTitleExist = await productModel.findOne({ title: data.title })
-    if (isTitleExist)
-      return res
-        .status(400)
-        .send({ status: false, message: "title is already registered" })
+    if (isTitleExist) return res.status(400).send({ status: false, message: "title is already registered" })
 
     //check if description is present or Not
     if (data.description || data.description === "") {
       if (!isValid(data.description))
-        return res
-          .status(400)
-          .send({ status: false, message: "Please provide description" })
+        return res.status(400).send({ status: false, message: "Please provide description" })
     }
 
     //check if price is present or not
     if (data.price || data.price === "") {
-      if (!isValid(data.price))
-        return res
-          .status(400)
-          .send({ status: false, message: "Please provide price" })
+      if (!isValid(data.price)) return res.status(400).send({ status: false, message: "Please provide price" })
       if (!data.price.match(/^\d*\.?\d*$/))
-        return res
-          .status(400)
-          .send({ status: false, message: "Price must be an integer" })
+        return res.status(400).send({ status: false, message: "Price must be an integer" })
     }
     //check if currencyId is present or not
     if (data.currencyId || data.currencyId === "") {
-      if (!isValid(data?.currencyId))
-        return res
-          .status(400)
-          .send({ status: false, message: "Please provide currencyId" })
-      if (data.currencyId != "INR")
-        return res
-          .status(400)
-          .send({ status: false, message: "currency should be INR" })
+      if (!isValid(data.currencyId))
+        return res.status(400).send({ status: false, message: "Please provide currencyId" })
+      if (data.currencyId !== "inr") return res.status(400).send({ status: false, message: "currency should be INR" })
     }
 
     //check if productImage is present or not
     if (files) {
-      if (files.length === 0)
-        return res
-          .status(400)
-          .send({ status: false, message: "Please upload productImage" })
+      if (files.length === 0) return res.status(400).send({ status: false, message: "Please upload productImage" })
       const productPicture = await uploadFile(files[0])
       data.productImage = productPicture
     }
@@ -363,23 +293,15 @@ const updateProduct = async (req, res) => {
     //check if currencyFormat is present or not
     if (data.currencyFormat || data.currencyFormat === "") {
       if (!isValid(data.currencyFormat))
-        return res
-          .status(400)
-          .send({ status: false, message: "Please provide currencyFormat" })
+        return res.status(400).send({ status: false, message: "Please provide currencyFormat" })
       if (data.currencyFormat != "₹")
-        return res
-          .status(400)
-          .send({ status: false, message: "currency format should be ₹ " })
+        return res.status(400).send({ status: false, message: "currency format should be ₹ " })
     }
 
     //check if isFreeShipping is present or not
     if (data.isFreeShipping || data.isFreeShipping === "") {
       // if (!isValid(data.isFreeShipping)) return res.status(400).send({ status: false, message: "isFreeShipping cant be empty" })
-      if (
-        !data.isFreeShipping
-          .toLowerCase()
-          .match(/^(true|false|True|False|TRUE|FALSE)$/)
-      )
+      if (!data.isFreeShipping.toLowerCase().match(/^(true|false|True|False|TRUE|FALSE)$/))
         return res.status(400).send({
           status: false,
           message: "Please provide isFreeShipping true/false",
@@ -388,19 +310,14 @@ const updateProduct = async (req, res) => {
 
     //check if style is present or not
     if (data.style || data.style === "") {
-      if (!isValid(data.style))
-        return res
-          .status(400)
-          .send({ status: false, message: "Please provide style" })
+      if (!isValid(data.style)) return res.status(400).send({ status: false, message: "Please provide style" })
     }
 
     //check if availableSizes is present or not
     if (data.availableSizes || data.availableSizes === "") {
       var availableSize = data.availableSizes.toUpperCase().split(",") // Creating an array
       for (let i = 0; i < availableSize.length; i++) {
-        if (
-          !["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSize[i])
-        ) {
+        if (!["S", "XS", "M", "X", "L", "XXL", "XL"].includes(availableSize[i])) {
           return res.status(400).send({
             status: false,
             message: `Sizes should be ${[
@@ -420,13 +337,9 @@ const updateProduct = async (req, res) => {
     //check if installments is present or not
     if (data.installments || data.installments === "") {
       if (!isValid(data.installments))
-        return res
-          .status(400)
-          .send({ status: false, message: "Please provide installments" })
+        return res.status(400).send({ status: false, message: "Please provide installments" })
       if (!data.installments.match(/^\d*\.?\d*$/))
-        return res
-          .status(400)
-          .send({ status: false, message: "Installment must be an integer" })
+        return res.status(400).send({ status: false, message: "Installment must be an integer" })
     }
 
     const updateData = await productModel.findOneAndUpdate(
@@ -463,10 +376,7 @@ const deleteProduct = async (req, res) => {
     const productId = req.params.productId
 
     //id format validation
-    if (!isValidObjectId(productId))
-      return res
-        .status(400)
-        .send({ status: false, message: " Invalid productId" })
+    if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: " Invalid productId" })
 
     //fetch product
     const products = await productModel.findOneAndUpdate(
@@ -474,10 +384,7 @@ const deleteProduct = async (req, res) => {
       { isDeleted: true, deletedAt: Date.now() },
       { new: true }
     )
-    if (!products)
-      return res
-        .status(404)
-        .send({ status: false, message: "products not found" })
+    if (!products) return res.status(404).send({ status: false, message: "products not found" })
 
     return res.status(200).send({
       status: true,

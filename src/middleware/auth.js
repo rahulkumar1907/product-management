@@ -12,9 +12,8 @@ const auth = function (req, res, next) {
     
         jwt.verify(bearerToken,'shoppingCart',function (err, data) {
         if(err){
-            return res.status(400).send({ status: false, message: "Invalid User"})
+            return res.status(400).send({ status: false, message: "Invalid token"})
         }else{
-            console.log(data)
             req.userId = data.userId;
             next()
         }
