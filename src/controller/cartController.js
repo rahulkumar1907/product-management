@@ -15,9 +15,9 @@ const createCart = async function (req, res) {
 
     //  authroization
 
-    if (!(userId === jwtUserId)) {
-      return res.status(403).send({ status: false, msg: "unauthorized access" })
-    }
+    // if (!(userId === jwtUserId)) {
+    //   return res.status(403).send({ status: false, msg: "unauthorized access" })
+    // }
 
     if (!isValidObjectId(userId)) {
       return res.status(400).send({

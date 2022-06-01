@@ -4,6 +4,106 @@ const orderModel = require("../model/orderModel")
 const ObjectId = require("mongoose").Types.ObjectId
 const { isValid, isValidObjectId } = require("../validation/validate")
 
+// const createOrder = async function (req, res) {
+//   try {
+//     let userId = req.params.userId
+//     let data = req.body
+//     let { cartId, status, cancellable} = data
+
+//     if (!ObjectId.isValid(userId)) {
+//       return res.status(400).send({ status: false, message: "Invalid userId" })
+//     }
+
+//     const isUserExits = await userModel.findById(userId)
+//     if (!isUserExits) {
+//       return res.status(404).send({ status: false, message: "This Cart doesn't exist for this user" })
+//     }
+
+//       //Authorisation
+//     // if (req.userId !== userId) {
+//     //   return res.status(403).send({ status: false, message: "Unauthorized user" })
+//     // }
+//     if (!Object.keys(data).length) {
+//       res.status(400).send({
+//         status: false,
+//         message: "Plase Provide cartId,cancellable,status",
+//       })
+//       return
+//     }
+
+//     if (!isValid(cartId)) {
+//       return res.status(400).send({ status: false, message: "Please enter cartId" })
+//     }
+
+//     if (!isValidObjectId(cartId)) {
+//       return res.status(400).send({ status: false, message: "cart id is not valid" })
+//     }
+//     const findCart = await cartModel.findOne({ _id: cartId, userId: userId })
+//     if (!findCart) {
+//       return res.status(404).send({ status: false, message: "No cart found" })
+//     }
+//     let itemsArr = findCart.items
+//     if (itemsArr.length == 0) {
+//       return res.status(400).send({ status: false, message: "Cart is empty" })
+//     }
+
+//     let sum = 0
+//     for (let i of itemsArr) {
+//       sum += i.quantity
+//     }
+
+//     console.log(data.cancellable)
+//     //is cancellable key available?
+//     if (data?.cancellable) {
+//       if (!isValid(cancellable)) {
+//         return res.status(400).send({ status: false, message: "Please enter cancellable" })
+//       }
+
+//       //cancellable must be boolean
+//       if (![true, false].includes(cancellable)) {
+//         return res.status(400).send({
+//           status: false,
+//           message: "cancellable must be a boolean value",
+//         })
+//       }
+//     }
+      
+//     let newData = {
+//       userId: userId,
+//       items: findCart.items,
+//       totalPrice: findCart.totalPrice,
+//       totalItems: findCart.totalItems,
+//       totalQuantity: sum,
+//       cancellable: cancellable
+//     }
+    
+
+//     if (data?.status) {
+//       if (!isValid(status)) {
+//         return res.status(400).send({ status: false, message: "Please enter status" })
+//       }
+//       if (!["pending", "completed", "canceled"].includes(status)) {
+//         return res.status(400).send({
+//           status: false,
+//           message: "status must be a pending,completed,canceled",
+//         })
+//       }
+    
+//     }
+//     await orderModel.create(newData)
+//     let selectedData = await orderModel.findOne({cartId: cartId},{isDeleted: 0, __v:0})
+//     // console.log(selectedData);
+
+//     findCart.items = []
+//     findCart.totalItems = 0
+//     findCart.totalPrice = 0
+//     findCart.save()
+//     return res.status(200).send({ status: true, message: "Success", data: selectedData })
+    
+//   } catch (err) {
+//     return res.status(500).send({ status: false, message: err.message })
+//   }
+// }
 const createOrder = async function (req, res) {
   try {
     let userId = req.params.userId
@@ -20,9 +120,9 @@ const createOrder = async function (req, res) {
     }
 
     //Authorisation
-    if (req.userId !== userId) {
-      return res.status(403).send({ status: false, message: "Unauthorized user" })
-    }
+    // if (req.userId !== userId) {
+    //   return res.status(403).send({ status: false, message: "Unauthorized user" })
+    // }
     if (!Object.keys(data).length) {
       res.status(400).send({
         status: false,
@@ -61,7 +161,7 @@ const createOrder = async function (req, res) {
     }
 
     //is cancellable key available?
-    if (data.cancellable) {
+    if (cancellable) {
       if (!isValid(cancellable)) {
         return res.status(400).send({ status: false, message: "Please enter cancellable" })
       }
@@ -73,8 +173,10 @@ const createOrder = async function (req, res) {
           message: "cancellable must be a boolean value",
         })
       }
-      newData.cancellable = cancellable
+    
     }
+    newData.cancellable = cancellable
+
 
     if (data?.status) {
       if (!isValid(status)) {
@@ -105,9 +207,10 @@ const updateOrder = async (req, res) => {
     let userId = req.params.userId
 
     //Authorization
-    if (req.userId !== userId) {
-      return res.status(403).send({ status: false, message: "Unauthorized user" })
-    }
+    // if (req.userId !== userId) {
+    //   return res.status(403).send({ status: false, message: "Unauthorized user" })
+    // }
+
     //checking if cart exists or not
     let findOrder = await orderModel.findOne({
       userId: userId,
@@ -147,10 +250,11 @@ const updateOrder = async (req, res) => {
     //checking if the order is cancellable or not
     if (!findOrder.cancellable) return res.status(400).send({ status: false, message: "You cannot cancel this order" })
 
-    await orderModel.updateOne({ _id: findOrder._id }, { status: "Cancelled", isDeleted: true, deletedAt: Date.now() })
+    let orderUpdate = await orderModel.findOneAndUpdate({ _id: findOrder._id }, { status: "Cancelled", isDeleted: true, deletedAt: Date.now() },{new: true})
     res.status(200).send({
       status: true,
       message: `Your order with this '${findOrder._id}' ID has been cancelled`,
+      data: orderUpdate
     })
   } catch (err) {
     res.status(500).send({ status: false, error: err.message })
