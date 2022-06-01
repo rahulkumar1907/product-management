@@ -201,7 +201,11 @@ const getProduct = async (req, res) => {
     }
 
     //TODO : sort product based on price
-    const getProduct = await productModel.find(filter).sort({ priceSort: 1 }) //collation is use to make sorting cas incasesentive
+    let  sortedprice = data.priceSort
+
+    if (!sortedprice.match(/^(1|-1)$/)) return res.status(400).send({ status: false, message: "priceSort must be 1 or -1" })
+    
+    const getProduct = await productModel.find(filter).sort({ price: sortedprice }) //collation is use to make sorting case incasesentive
 
     if (!getProduct.length) {
       return res.status(404).send({ status: false, message: "Product not found" })

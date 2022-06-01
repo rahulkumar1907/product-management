@@ -205,12 +205,11 @@ const userLogin = async (req, res) => {
 
     if (!isPasswordMatch) return res.status(401).send({ status: false, message: "Password is Incorrect" })
 
+    
     const token = jwt.sign(
-      {
-        userId: isEmailExists._id.toString(),
-        expiresIn: "24h",
-      },
-      "shoppingCart"
+      {userId: isEmailExists._id.toString()},
+      "shoppingCart",
+      { expiresIn: '24h' }
     )
 
     let result = {
