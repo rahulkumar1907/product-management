@@ -110,7 +110,7 @@ const createOrder = async function (req, res) {
     let data = req.body
     let { cartId, cancellable, status } = data
 
-    if (!ObjectId.isValid(userId)) {
+    if (!isValidObjectId(userId)) {
       return res.status(400).send({ status: false, message: "user id is not valid" })
     }
 
@@ -123,6 +123,7 @@ const createOrder = async function (req, res) {
     // if (req.userId !== userId) {
     //   return res.status(403).send({ status: false, message: "Unauthorized user" })
     // }
+
     if (!Object.keys(data).length) {
       res.status(400).send({
         status: false,
@@ -205,24 +206,15 @@ const createOrder = async function (req, res) {
 const updateOrder = async (req, res) => {
   try {
     let userId = req.params.userId
+    let data = req.body
 
     //Authorization
     // if (req.userId !== userId) {
     //   return res.status(403).send({ status: false, message: "Unauthorized user" })
     // }
 
-    //checking if cart exists or not
-    let findOrder = await orderModel.findOne({
-      userId: userId,
-      isDeleted: false,
-    })
-    if (!findOrder)
-      return res.status(404).send({
-        status: false,
-        message: `No order found with this '${userId}' user-ID`,
-      })
-
-    let data = req.body
+    if (!isValidObjectId(userId))
+      return res.status(400).send({ status: false, message: "Enter a valid user-Id" })
 
     //checking for a valid user input
     if (!Object.keys(data).length)
@@ -239,6 +231,17 @@ const updateOrder = async (req, res) => {
       })
     if (!isValidObjectId(data.orderId))
       return res.status(400).send({ status: false, message: "Enter a valid order-Id" })
+
+      //checking if cart exists or not
+    let findOrder = await orderModel.findOne({
+      userId: userId,
+      isDeleted: false,
+    })
+    if (!findOrder)
+      return res.status(404).send({
+        status: false,
+        message: `No order found with this '${userId}' user-ID`,
+      })
 
     //checking if orderId is same or not
     if (findOrder._id.toString() !== data.orderId)

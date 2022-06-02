@@ -31,6 +31,7 @@ const userRegister = async (req, res) => {
         status: false,
         Message: "Please provide user's profile picture",
       })
+      
 
     if (!isValid(fname)) return res.status(400).send({ status: false, Message: "Please provide your first name" })
     if (!fname.trim().match(/^[a-zA-Z ]{2,30}$/))
