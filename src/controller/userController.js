@@ -52,7 +52,7 @@ const userRegister = async (req, res) => {
     if (!isValid(phone))
       return res.status(400).send({
         status: false,
-        Message: "Please provide your valid phone number",
+        Message: "Please provide your phone number",
       })
 
     if (!isValid(password)) return res.status(400).send({ status: false, Message: "Please provide your password" })
@@ -129,7 +129,7 @@ const userRegister = async (req, res) => {
       return res.status(400).send({ status: false, message: "Please enter valid email" })
 
     if (!phone.trim().match(phoneRegex))
-      return res.status(400).send({ status: false, message: "Please enter valid phone" })
+      return res.status(400).send({ status: false, message: "Please enter valid phone number" })
 
     if (!isValidPassword(password))
       return res.status(400).send({
@@ -218,7 +218,7 @@ const userLogin = async (req, res) => {
       token: token,
     }
 
-    res.status(200).send({ status: false, message: "Login Successful", data: result })
+    res.status(200).send({ status: true, message: "Login Successful", data: result })
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message })
   }
@@ -232,6 +232,10 @@ const getUser = async (req, res) => {
     userId = req.params.userId
 
     if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: " Invalid userId" })
+
+    //check user is exist or not (changing)
+    let checkUser = await userModel.findById(userId)
+    if(!checkUser) return res.status(404).send({ status: false, message: "UserId doesn't exists" })
 
     if (req.userId !== userId) return res.status(403).send({ status: false, message: "unauthorized access" })
 
@@ -256,6 +260,10 @@ const updateUser = async (req, res) => {
     let files = req.files
 
     if (!isValidObjectId(userId)) return res.status(400).send({ status: false, message: " Invalid userId" })
+
+    //check user is exist or not (changing)
+    let checkUser = await userModel.findById(userId)
+    if(!checkUser) return res.status(404).send({ status: false, message: "UserId doesn't exists" })
 
     if (userId !== req.userId) return res.status(403).send({ status: false, message: "Unauthorized access" })
 
@@ -303,10 +311,16 @@ const updateUser = async (req, res) => {
       if (!isValid(data.phone))
         return res.status(400).send({
           status: false,
-          Message: "Please provide your valid phone number",
+          Message: "Please provide your phone number",
         })
       if (!data.phone.trim().match(/^(\+91[\-\s]?)?[0]?(91)?[6789]\d{9}$/))
         return res.status(400).send({ status: false, message: "Please enter valid phone" })
+
+        if (!isValidPassword(data.password))
+      return res.status(400).send({
+        status: false,
+        message: "Please provide a valid password ,Password should be of 8 - 15 characters",
+      })
 
       //Check phone in DB
       const isRegisterPhone = await userModel.findOne({ phone: data.phone })
@@ -318,7 +332,7 @@ const updateUser = async (req, res) => {
     }
 
     if (isValidFiles(files)) {
-      if (files.length === 0) return res.status(400).send({ status: false, Message: "Please upload profileImage" })
+      if (files.length === 0) return res.status(400).send({ status: false, message: "Please upload profileImage" })
       const profilePicture = await uploadFile(files[0])
       data.profileImage = profilePicture
     }

@@ -41,12 +41,15 @@ const createProduct = async (req, res) => {
     if (currencyFormat != "₹") return res.status(400).send({ status: false, message: "currency format should be ₹ " })
 
     if (isFreeShipping == "") return res.status(400).send({ status: false, message: "Freeshipping can't be empty" })
-    if (!isFreeShipping.match(/^(true|false|TRUE|FALSE)$/))
-      return res.status(400).send({
-        status: false,
-        message: "Freeshipping must be in Boolean (True or false)",
-      })
 
+    //changes because it shows cannot read property match when we dont give the field
+    if (isFreeShipping) {
+      if (!isFreeShipping.match(/^(True|False|true|false|TRUE|FALSE)$/))
+        return res.status(400).send({
+          status: false,
+          message: "Freeshipping must be in Boolean (True or false)",
+        })
+    }
     if (!availableSizes)
       return res.status(400).send({
         status: false,
@@ -109,6 +112,7 @@ const createProduct = async (req, res) => {
       data: createProduct,
     })
   } catch (error) {
+    console.log(error)
     res.status(500).send({ status: false, message: error.message })
   }
 }
@@ -201,10 +205,12 @@ const getProduct = async (req, res) => {
     }
 
     //TODO : sort product based on price
-    let  sortedprice = data.priceSort
+    let sortedprice = data.priceSort
 
-    if (!sortedprice.match(/^(1|-1)$/)) return res.status(400).send({ status: false, message: "priceSort must be 1 or -1" })
-    
+    if (sortedprice) {
+      if (!sortedprice.match(/^(1|-1)$/))
+        return res.status(400).send({ status: false, message: "priceSort must be 1 or -1" })
+    }
     const getProduct = await productModel.find(filter).sort({ price: sortedprice }) //collation is use to make sorting case incasesentive
 
     if (!getProduct.length) {
@@ -213,6 +219,7 @@ const getProduct = async (req, res) => {
 
     return res.status(200).send({ status: true, message: "Product details", data: getProduct })
   } catch (error) {
+    console.log(error)
     res.status(500).send({ status: false, message: error.message })
   }
 }
@@ -226,9 +233,8 @@ const getProductById = async (req, res) => {
 
     let data = await productModel.findOne({ _id: productId, isDeleted: false })
     if (!data) {
-      return res.status(404).send({ status: false, message: "Product not found" })
+      return res.status(404).send({ status: false, message: "productId doesn't exists or product not found" })
     }
-
     return res.status(200).send({ status: true, message: "Product details", data: data })
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message })
@@ -248,7 +254,7 @@ const updateProduct = async (req, res) => {
 
     //Check product in DB
     let checkedProductId = await productModel.findOne({ _id: productId })
-    if (!checkedProductId) return res.status(404).send({ status: false, message: "Product not Exist" })
+    if (!checkedProductId) return res.status(404).send({ status: false, message: "ProductId not Exist" })
 
     if (!(files && !Object.keys(data).length)) {
       if (!Object.keys(data).length)
@@ -315,13 +321,17 @@ const updateProduct = async (req, res) => {
         })
     }
 
-    //check if style is present or not
     if (data.style || data.style === "") {
       if (!isValid(data.style)) return res.status(400).send({ status: false, message: "Please provide style" })
     }
 
-    //check if availableSizes is present or not
-    if (data.availableSizes || data.availableSizes === "") {
+    //check if availableSizes is present or not (changing)
+    if (data.availableSizes === "") {
+      if (!isValid(data.availableSizes))
+        return res.status(400).send({ status: false, message: "Please provide availableSize" })
+    }
+
+    if (data.availableSizes) {
       var availableSize = data.availableSizes.toUpperCase().split(",") // Creating an array
       let enumArr = ["S", "XS", "M", "X", "L", "XXL", "XL"]
       for (let i = 0; i < availableSize.length; i++) {
@@ -344,11 +354,10 @@ const updateProduct = async (req, res) => {
 
     const updateData = await productModel.findOneAndUpdate({ _id: productId, isDeleted: false }, data, { new: true })
 
-    return res.status(200).send({
-      status: true,
-      message: "product updated successfully",
-      data: updateData,
-    })
+    //changing this line was missing
+    if (!updateData) return res.status(404).send({ status: false, message: "Product not found or already deleted" })
+
+    return res.status(200).send({ status: true, message: "product updated successfully", data: updateData })
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message })
   }
@@ -362,6 +371,10 @@ const deleteProduct = async (req, res) => {
 
     //id format validation
     if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: " Invalid productId" })
+   
+    //check product is exist or not (changing)
+    let checkProduct = await productModel.findById(productId)
+    if(!checkProduct) return res.status(404).send({ status: false, message: "ProductId doesn't exists" })
 
     //fetch product
     const products = await productModel.findOneAndUpdate(
@@ -369,7 +382,7 @@ const deleteProduct = async (req, res) => {
       { isDeleted: true, deletedAt: Date.now() },
       { new: true }
     )
-    if (!products) return res.status(404).send({ status: false, message: "products not found" })
+    if (!products) return res.status(404).send({ status: false, message: "product not found" })
 
     return res.status(200).send({
       status: true,

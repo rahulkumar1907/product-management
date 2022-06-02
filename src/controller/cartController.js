@@ -1,5 +1,4 @@
 const cartModel = require("../model/cartModel")
-const userModel = require("../model/userModel")
 const productModel = require("../model/productModel")
 
 const { isValid, isValidObjectId, isValidRequestBody } = require("../validation/validate")
@@ -71,7 +70,7 @@ const createCart = async function (req, res) {
     })
 
     if (!checkCartExist) {
-      if (cartId) return res.status(400).send({ status: false, message: "Cart not exist for this user" })
+      if (cartId) return res.status(404).send({ status: false, message: "Cart not exist for this user" })
       let createCartObject = {
         userId: userId,
         items: [{ productId: productId, quantity: 1 }],
@@ -180,17 +179,18 @@ const updateCart = async (req, res) => {
       _id: productId,
       isDeleted: false,
     })
-    if (!isProductExits) return res.status(404).send({ status: false, message: "product is not available " })
+    if (!isProductExits) return res.status(404).send({ status: false, message: "product is not available" })
 
+    //changing
     const isCart = await cartModel.findOne({
-      cartId: cartId,
+      _id: cartId,
       "items.productId": productId,
     })
 
     if (!isCart)
       return res.status(404).send({
         status: false,
-        message: "product is not available in cart",
+        message: "product is not available in cart or cartId doesn't exist",
       })
 
     //to reduce quantity of product
@@ -206,7 +206,6 @@ const updateCart = async (req, res) => {
 
       //to check if product quantity is 0 or note
       let qty = updateCart.items.filter((item) => item.productId.toString() === productId)[0].quantity
-      console.log(typeof qty)
       if (qty == 0) {
         let result = await cartModel.findOneAndUpdate(
           { cartId: cartId, "items.productId": productId },
@@ -222,7 +221,6 @@ const updateCart = async (req, res) => {
           data: result,
         })
       }
-      console.log(updateCart)
       return res.status(200).send({
         status: true,
         message: "one quantity has been removed successfully",
@@ -235,7 +233,6 @@ const updateCart = async (req, res) => {
       let qty = isCart.items.filter((item) => item.productId.toString() === productId)[0].quantity
 
       let productPrice = isProductExits.price
-      console.log(productPrice)
       let result = await cartModel.findOneAndUpdate(
         { cartId: cartId, "items.productId": productId },
         {
@@ -302,7 +299,8 @@ const deleteCart = async (req, res) => {
       { items: [], totalItems: 0, totalPrice: 0 },
       { new: true }
     )
-    res.status(200).send({
+    // status code 204 for No Content (Here we just do the content empty) .... (changing)----> response structure will vanishing.
+    res.status(204).send({
       status: true,
       message: "Cart has been deleted successfully",
       data: deletedCart,
