@@ -108,14 +108,14 @@ const createProduct = async (req, res) => {
     const createProduct = await productModel.create(productData)
     res.status(201).send({
       status: true,
-      message: "product created sucessfully",
+      message: "Success",
       data: createProduct,
     })
   } catch (error) {
-    console.log(error)
     res.status(500).send({ status: false, message: error.message })
   }
 }
+
 
 /**************************Sixth Api*************************/
 const getProduct = async (req, res) => {
@@ -217,9 +217,8 @@ const getProduct = async (req, res) => {
       return res.status(404).send({ status: false, message: "Product not found" })
     }
 
-    return res.status(200).send({ status: true, message: "Product details", data: getProduct })
+    return res.status(200).send({ status: true, message: "Success", data: getProduct })
   } catch (error) {
-    console.log(error)
     res.status(500).send({ status: false, message: error.message })
   }
 }
@@ -235,7 +234,7 @@ const getProductById = async (req, res) => {
     if (!data) {
       return res.status(404).send({ status: false, message: "productId doesn't exists or product not found" })
     }
-    return res.status(200).send({ status: true, message: "Product details", data: data })
+    return res.status(200).send({ status: true, message: "Success", data: data })
   } catch (error) {
     return res.status(500).send({ status: false, message: error.message })
   }
@@ -371,10 +370,10 @@ const deleteProduct = async (req, res) => {
 
     //id format validation
     if (!isValidObjectId(productId)) return res.status(400).send({ status: false, message: " Invalid productId" })
-   
+
     //check product is exist or not (changing)
     let checkProduct = await productModel.findById(productId)
-    if(!checkProduct) return res.status(404).send({ status: false, message: "ProductId doesn't exists" })
+    if (!checkProduct) return res.status(404).send({ status: false, message: "ProductId doesn't exists" })
 
     //fetch product
     const products = await productModel.findOneAndUpdate(

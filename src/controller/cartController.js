@@ -14,9 +14,9 @@ const createCart = async function (req, res) {
 
     //  authroization
 
-    // if (!(userId === jwtUserId)) {
-    //   return res.status(403).send({ status: false, msg: "unauthorized access" })
-    // }
+    if (!(userId === jwtUserId)) {
+      return res.status(403).send({ status: false, msg: "unauthorized access" })
+    }
 
     if (!isValidObjectId(userId)) {
       return res.status(400).send({
@@ -79,8 +79,8 @@ const createCart = async function (req, res) {
       }
       const createCart = await cartModel.create(createCartObject)
       return res.status(201).send({
-        statu: true,
-        msg: "successfully created cart ",
+        status: true,
+        message: "Success",
         data: createCart,
       })
     }
@@ -102,9 +102,10 @@ const createCart = async function (req, res) {
           },
           { new: true }
         )
-        return res.status(200).send({
+        //changing status code to 201
+        return res.status(201).send({
           status: true,
-          msg: "successfully add product quantity",
+          message: "Success",
           data: updateCart,
         })
       }
@@ -115,9 +116,11 @@ const createCart = async function (req, res) {
       totalItems: checkCartExist.totalItems + 1,
     }
     const updateCart = await cartModel.findOneAndUpdate({ userId: userId }, updateCartObject, { new: true })
-    res.status(200).send({
+
+    //changing status code to 201
+    res.status(201).send({
       status: true,
-      msg: "successfully added new product",
+      message: "Success",
       data: updateCart,
     })
   } catch (error) {
@@ -217,13 +220,13 @@ const updateCart = async (req, res) => {
         )
         return res.status(200).send({
           status: true,
-          message: "product removed from cart",
+          message: "Success",
           data: result,
         })
       }
       return res.status(200).send({
         status: true,
-        message: "one quantity has been removed successfully",
+        message: "Success",
         data: updateCart,
       })
     }
@@ -243,7 +246,7 @@ const updateCart = async (req, res) => {
       )
       return res.status(200).send({
         status: true,
-        message: "product removed from cart",
+        message: "Success",
         data: result,
       })
     }
@@ -262,7 +265,7 @@ const getCart = async (req, res) => {
       return res.status(400).send({ status: false, message: "Please provide a valid userId" })
 
     // Authorization Field
-    // if (req.userId !== jwtUserId) return res.status(403).send({ status: false, message: "Unauthorized access" })
+    if (req.userId !== jwtUserId) return res.status(403).send({ status: false, message: "Unauthorized access" })
 
     //Checking cart in DB
     const checkingCart = await cartModel.findOne({ userId: userId })
@@ -270,7 +273,7 @@ const getCart = async (req, res) => {
 
     res.status(200).send({
       status: true,
-      message: "Cart getting successfully",
+      message: "Success",
       data: checkingCart,
     })
   } catch (error) {
@@ -288,7 +291,7 @@ const deleteCart = async (req, res) => {
       return res.status(400).send({ status: false, message: "Please provide a valid userId" })
 
     //Authorization Field
-    // if (req.userId !== userId) return res.status(403).send({ status: false, message: "Unauthorized access" })
+    if (req.userId !== userId) return res.status(403).send({ status: false, message: "Unauthorized access" })
 
     //Checking cart in DB
     const checkingCart = await cartModel.findOne({ userId: userId })

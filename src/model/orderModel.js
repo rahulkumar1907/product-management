@@ -12,7 +12,7 @@ const orderSchema = new mongoose.Schema({
   totalItems: {type: Number,required: true,trim: true},
   totalQuantity: {type: Number,required: true,trim: true,},
   cancellable: {type: Boolean,default: true,trim: true},
-  status: {type: String,default: 'Pending',enum: ['Pending','Completed','Cancelled'],trim: true},
+  status: {type: String,default: 'pending',enum: ['pending','completed','cancelled'],trim: true},
   deletedAt: {type: Date,},
   isDeleted: {type: Boolean,default: false}
 },{timestamps: true});

@@ -20,9 +20,9 @@ const createOrder = async function (req, res) {
     }
 
     //Authorisation
-    // if (req.userId !== userId) {
-    //   return res.status(403).send({ status: false, message: "Unauthorized user" })
-    // }
+    if (req.userId !== userId) {
+      return res.status(403).send({ status: false, message: "Unauthorized user" })
+    }
 
     if (!Object.keys(data).length) {
       res.status(400).send({
@@ -97,7 +97,7 @@ const createOrder = async function (req, res) {
     findCart.totalItems = 0
     findCart.totalPrice = 0
     findCart.save()
-    return res.status(200).send({ status: true, message: "Success", data: orderCreated })
+    return res.status(201).send({ status: true, message: "Success", data: orderCreated })
   } catch (err) {
     return res.status(500).send({ status: false, message: err.message })
   }
@@ -109,9 +109,9 @@ const updateOrder = async (req, res) => {
     let data = req.body
 
     //Authorization
-    // if (req.userId !== userId) {
-    //   return res.status(403).send({ status: false, message: "Unauthorized user" })
-    // }
+    if (req.userId !== userId) {
+      return res.status(403).send({ status: false, message: "Unauthorized user" })
+    }
 
     if (!isValidObjectId(userId))
       return res.status(400).send({ status: false, message: "Enter a valid user-Id" })
@@ -153,10 +153,10 @@ const updateOrder = async (req, res) => {
     //checking if the order is cancellable or not
     if (!findOrder.cancellable) return res.status(400).send({ status: false, message: "You cannot cancel this order" })
 
-    let orderUpdate = await orderModel.findOneAndUpdate({ _id: findOrder._id }, { status: "Cancelled", isDeleted: true, deletedAt: Date.now() },{new: true})
+    let orderUpdate = await orderModel.findOneAndUpdate({ _id: findOrder._id }, { status: "cancelled", isDeleted: true, deletedAt: Date.now() },{new: true})
     res.status(200).send({
       status: true,
-      message: `Your order with this '${findOrder._id}' ID has been cancelled`,
+      message: "Success",
       data: orderUpdate
     })
   } catch (err) {
