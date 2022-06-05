@@ -26,6 +26,7 @@ const uploadFile = async function (file, name) {
       }
 
       return resolve(data.Location)
+      
     })
   })
 }
